@@ -30,7 +30,7 @@ namespace DynDnsUpdater
                 StaticLogger.Log("Unable to determine public IP.");
                 Environment.Exit(1);
             }
-            StaticLogger.Log(String.Format("Public IP: {0}", newIP), StaticLogger.LogLevel.Info);
+            StaticLogger.Log(StaticLogger.LogLevel.Info, String.Format("Public IP: {0}", newIP));
             IDomainZone proxy = XmlRpcProxyGen.Create<IDomainZone>();
             ZoneListReturn[] list = proxy.ZoneList(_gandiApiKey);
             ZoneListReturn zoneResult = list.FirstOrDefault<ZoneListReturn>(zr => zr.name.Equals(_zoneName, StringComparison.InvariantCultureIgnoreCase));
@@ -145,7 +145,7 @@ namespace DynDnsUpdater
             // for debugging from VS use the -stdin command line paramenter to read the regular parameters from the console
             if (args[0] == "-stdin")
             {
-                Console.WriteLine("Arguments: ");
+                Console.Write("Arguments: ");
                 args = Console.ReadLine().Split(' ');
             }
 

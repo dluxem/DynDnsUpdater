@@ -31,7 +31,7 @@ namespace DynDnsUpdater
 
         public static void Log(LogLevel logLevel, string message)
         {
-            if (logLevel >= _logLevel)
+            if (logLevel <= _logLevel)
             {
                 // Prepend Log Level
                 string levelMessage;
