@@ -13,87 +13,94 @@ namespace DynDnsUpdater
         private static string _zoneName;
         private static string _hostName;
         private static readonly int _defautlTTL = 10800;
+        private static readonly string[] _defaulIpServices = { "http://icanhazip.com/", "http://ifconfig.me/ip" };
 
+        static Program()
+        {
+            StaticLogger.LevelToOutput = StaticLogger.LogLevel.Debug;
+            StaticLogger.MethodToLog = StaticLogger.LogMethod.Console;
+        }
         static void Main(string[] args)
         {
             ParseArgs(args);
-            string newIP = DynDnsUpdater.AddressFinder.GetIP();
+            AddressFinder finder = new AddressFinder(_defaulIpServices);
+            string newIP = finder.GetIP();
             if (newIP == "")
             {
-                Console.WriteLine("Unable to determine public IP.");
+                StaticLogger.Log("Unable to determine public IP.");
                 Environment.Exit(1);
             }
-            Console.WriteLine("Public IP: {0}", newIP);
+            StaticLogger.Log(String.Format("Public IP: {0}", newIP), StaticLogger.LogLevel.Info);
             IDomainZone proxy = XmlRpcProxyGen.Create<IDomainZone>();
             ZoneListReturn[] list = proxy.ZoneList(_gandiApiKey);
             ZoneListReturn zoneResult = list.FirstOrDefault<ZoneListReturn>(zr => zr.name.Equals(_zoneName, StringComparison.InvariantCultureIgnoreCase));
             foreach (ZoneListReturn zl in list)
             {
-                Console.WriteLine("Name: [{1}]{0}", zl.name, zl.id);
+                StaticLogger.Log(String.Format("Name: [{1}]{0}", zl.name, zl.id));
             }
             if (zoneResult.id == 0)
             {
-                Console.WriteLine("Zone {0} not found.");
+                StaticLogger.Log("Zone {0} not found.");
                 Environment.Exit(1);
             }
             else
             {
-                Console.WriteLine("Found zone {0}. ID: {1}, Version: {2}", zoneResult.name, zoneResult.id, zoneResult.version);
+                StaticLogger.Log(String.Format("Found zone {0}. ID: {1}, Version: {2}", zoneResult.name, zoneResult.id, zoneResult.version));
                 int newZoneVersion = proxy.ZoneNewVersion(_gandiApiKey, zoneResult.id);
-                Console.WriteLine("Created zone version {0}.", newZoneVersion);
+                StaticLogger.Log(String.Format("Created zone version {0}.", newZoneVersion));
                 ZoneRecordReturn[] records = proxy.RecordList(_gandiApiKey, zoneResult.id, newZoneVersion);
                 ZoneRecordReturn record = records.FirstOrDefault<ZoneRecordReturn>(r => r.name.Equals(_hostName, StringComparison.InvariantCultureIgnoreCase));
                 if (record.id == 0)
                 {
                     // Add record
-                    Console.WriteLine("Zone Record NOT Found. Adding...");
+                    StaticLogger.Log("Zone Record NOT Found. Adding...");
                     ZoneRecord newRecord;
                     newRecord.name = _hostName;
                     newRecord.type = "A";
                     newRecord.ttl = _defautlTTL;
                     newRecord.value = newIP;
                     ZoneRecordReturn result = proxy.RecordAdd(_gandiApiKey, zoneResult.id, newZoneVersion, newRecord);
-                    Console.WriteLine("New Record ID: {0}", result.id);
+                    StaticLogger.Log("New Record ID: {0}", result.id);
                     if (result.id != 0)
                     {
                         // ZoneRecordReturn result = updateResults[0];
-                        // Console.WriteLine("Record inserted. New record ID: {0}", result.id);
+                        // StaticLogger.Log("Record inserted. New record ID: {0}", result.id);
                         bool zoneUpdated = proxy.ZoneSetActiveVersion(_gandiApiKey, zoneResult.id, newZoneVersion);
                         if (zoneUpdated)
                         {
-                            Console.WriteLine("Zone updated to version {0}.", newZoneVersion);
+                            StaticLogger.Log("Zone updated to version {0}.", newZoneVersion);
                         }
                         else
                         {
-                            Console.WriteLine("Zone update failed.");
+                            StaticLogger.Log("Zone update failed.");
                             Environment.Exit(1);
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Unable to insert/add record. Deleting unused zone version {0}.", newZoneVersion);
+                        StaticLogger.Log("Unable to insert/add record. Deleting unused zone version {0}.", newZoneVersion);
                         proxy.ZoneDeleteVersion(_gandiApiKey, zoneResult.id, newZoneVersion);
                     }
                 }
                 else
                 {
                     // Update record if changed
-                    Console.WriteLine("Zone Record Found -");
-                    Console.WriteLine("ID: {0}", record.id);
-                    Console.WriteLine("Name: {0}", record.name);
-                    Console.WriteLine("Type: {0}", record.type);
-                    Console.WriteLine("Value: '{0}'", record.value);
-                    Console.WriteLine("newIP: '{0}'", newIP);
-                    Console.WriteLine("TTL: {0}", record.ttl);
+                    StaticLogger.Log("Zone Record Found -");
+                    StaticLogger.Log("ID: {0}", record.id);
+                    StaticLogger.Log("Name: {0}", record.name);
+                    StaticLogger.Log("Type: {0}", record.type);
+                    StaticLogger.Log("Value: '{0}'", record.value);
+                    StaticLogger.Log("newIP: '{0}'", newIP);
+                    StaticLogger.Log("TTL: {0}", record.ttl);
                     if (record.value == newIP)
                     {
                         proxy.ZoneDeleteVersion(_gandiApiKey, zoneResult.id, newZoneVersion);
-                        Console.WriteLine("IP Unchanged. Exiting.");
+                        StaticLogger.Log("IP Unchanged. Exiting.");
                         Environment.Exit(0);
                     }
                     if (record.type != "A")
                     { 
-                        Console.WriteLine("Unable to update record. Not an A record.");
+                        StaticLogger.Log("Unable to update record. Not an A record.");
                         Environment.Exit(1);
                     }
                     ZoneRecord newRecord;
@@ -107,26 +114,26 @@ namespace DynDnsUpdater
                     //RecordDeleteOptions recordToDelete;
                     //recordToDelete.id = record.id;
                     //int numDel = proxy.RecordDelete(_gandiApiKey, test.id, newZoneVersion, recordToDelete);
-                    //Console.WriteLine("NumDel: {0}", numDel);
+                    //StaticLogger.Log("NumDel: {0}", numDel);
                     if (updateResults.Length > 0)
                     {
                         // ZoneRecordReturn result = updateResults[0];
-                        // Console.WriteLine("Record inserted. New record ID: {0}", result.id);
+                        // StaticLogger.Log("Record inserted. New record ID: {0}", result.id);
                         bool zoneUpdated = proxy.ZoneSetActiveVersion(_gandiApiKey, zoneResult.id, newZoneVersion);
                         if (zoneUpdated)
                         {
-                            Console.WriteLine("Zone updated to version {0}. Deleting previous...", newZoneVersion);
+                            StaticLogger.Log("Zone updated to version {0}. Deleting previous...", newZoneVersion);
                             zoneUpdated = proxy.ZoneDeleteVersion(_gandiApiKey, zoneResult.id, zoneResult.version);
                         }
                         else
                         {
-                            Console.WriteLine("Zone update failed.");
+                            StaticLogger.Log("Zone update failed.");
                             Environment.Exit(1);
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Unable to update record. Deleting unused zone version {0}.", newZoneVersion);
+                        StaticLogger.Log("Unable to update record. Deleting unused zone version {0}.", newZoneVersion);
                         proxy.ZoneDeleteVersion(_gandiApiKey, zoneResult.id, newZoneVersion);
                     }
                 }
@@ -135,6 +142,13 @@ namespace DynDnsUpdater
 
         static void ParseArgs(string[] args)
         {
+            // for debugging from VS use the -stdin command line paramenter to read the regular parameters from the console
+            if (args[0] == "-stdin")
+            {
+                Console.WriteLine("Arguments: ");
+                args = Console.ReadLine().Split(' ');
+            }
+
             if (args.Length != 6)
             {
                 PrintUsageAndExit();
@@ -153,13 +167,13 @@ namespace DynDnsUpdater
 
         static void PrintUsageAndExit()
         {
-            Console.WriteLine("Usage: DynDnsUpdater.exe -apikey zzzzzzzzzzz -zonename example.com -hostname dynamichost");
+            StaticLogger.Log("Usage: DynDnsUpdater.exe -apikey zzzzzzzzzzz -zonename example.com -hostname dynamichost");
             Environment.Exit(0);
         }
 
         static void ErrorAndExit(Exception e)
         {
-            Console.WriteLine("Error Detected:");
+            StaticLogger.Log("Error Detected:");
             Console.Write(e.Message);
             Environment.Exit(1);
         }
