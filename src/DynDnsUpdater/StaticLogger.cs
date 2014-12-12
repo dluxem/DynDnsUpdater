@@ -29,6 +29,8 @@ namespace DynDnsUpdater
             set { _logMethod = value; }
         }
 
+        public static string LogFile { get; set; }
+
         public static void Log(LogLevel logLevel, string message)
         {
             if (logLevel <= _logLevel)

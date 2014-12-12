@@ -38,7 +38,7 @@ namespace DynDnsUpdater
             }
             catch (Exception e)
             {
-                StaticLogger.Log("Error reaching URL: {0}", e.Message);
+                StaticLogger.Log(StaticLogger.LogLevel.Error, "Error reaching URL: " + e.Message);
                 results = "";
             }
             // Look for garbage

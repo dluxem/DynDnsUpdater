@@ -2,8 +2,7 @@
 
 namespace DynDnsUpdater.Gandi
 {
-    [XmlRpcUrl("https://rpc.gandi.net/xmlrpc/")]
-    interface IDomainZone
+   public interface IDomainZone : IXmlRpcProxy
     {
         [XmlRpcMethod("domain.zone.list")]
         ZoneListReturn[] ZoneList(string apikey);
