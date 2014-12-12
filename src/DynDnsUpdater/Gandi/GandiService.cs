@@ -85,7 +85,7 @@ namespace DynDnsUpdater.Gandi
 
         public bool UpdateHost(string hostName, string ipAddress, int defaultTTL)
         {
-            if (!_ready) { return false; }
+            if (_simulate || !_ready) { return false; }
             int newZoneVersion = _proxy.ZoneNewVersion(_apiKey, _zone.id);
             StaticLogger.Log(String.Format("Created zone version {0}.", newZoneVersion));
 
@@ -129,7 +129,8 @@ namespace DynDnsUpdater.Gandi
                 if (zoneUpdated)
                 {
                     StaticLogger.Log("Zone updated to version {0}. Deleting previous...", newZoneVersion);
-                    zoneUpdated = _proxy.ZoneDeleteVersion(_apiKey, newZone.id, newZone.version);
+                    zoneUpdated = _proxy.ZoneDeleteVersion(_apiKey, _zone.id, _zone.version);
+                    _zone = newZone;
                 }
                 else
                 {

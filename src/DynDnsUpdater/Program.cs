@@ -13,7 +13,7 @@ namespace DynDnsUpdater
         private static string _gandiApiKey;
         private static string _zoneName;
         private static string _hostName;
-        private static readonly int _defautlTTL = 10800;
+        private static readonly int _defautlTTL = 3600;
         private static readonly string[] _defaulIpServices = { "http://icanhazip.com/", "http://ifconfig.me/ip" };
 
         static Program()
@@ -44,11 +44,14 @@ namespace DynDnsUpdater
                     {
                         StaticLogger.Log("IPs match. No update necessary.");
                     }
-                    else { dnsSerivce.UpdateHost(_hostName, newIP, _defautlTTL); }
+                    else {
+                        StaticLogger.Log(StaticLogger.LogLevel.Info, "IP address changed. Updating to " + newIP);
+                        dnsSerivce.UpdateHost(_hostName, newIP, _defautlTTL); 
+                    }
                 }
                 else
                 {
-                    StaticLogger.Log("New host name. Adding host...");
+                    StaticLogger.Log(StaticLogger.LogLevel.Info, "New host name. Adding host...");
                     dnsSerivce.AddHost(_hostName, newIP, _defautlTTL);
                 }
             }
