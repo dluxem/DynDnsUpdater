@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace DynDnsUpdater
 {
@@ -16,6 +17,7 @@ namespace DynDnsUpdater
         {
             _logMethod = LogMethod.Console;
             _logLevel = LogLevel.Info;
+            LogFile = "";
         }
 
         public static LogLevel LevelToOutput
@@ -66,9 +68,20 @@ namespace DynDnsUpdater
                     Console.ForegroundColor = defColor;
                     Console.WriteLine(message);
                 }
-                else if (_logMethod == LogMethod.File)
+                if (_logMethod == LogMethod.File || _logMethod == LogMethod.Tee)
                 {
-
+                    try
+                    {
+                        if (LogFile.Length > 0)
+                        {
+                            File.AppendAllText(LogFile, DateTime.Now.ToString("s") + " " + levelMessage + " " + message + "\r\n");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error logging to file. " + e.Message);
+                        LogFile = "";
+                    }
                 }
 
 

@@ -20,7 +20,7 @@ namespace DynDnsUpdater.Gandi
 
         public GandiService(bool useTestSystem, string apiKey, string zoneName, bool simulate)
         {
-            StaticLogger.Log("Starting GandiService");
+            StaticLogger.Log("Starting GandiService (constructor)");
             _apiKey = apiKey;
             _zoneName = zoneName;
             _simulate = simulate;
@@ -47,7 +47,7 @@ namespace DynDnsUpdater.Gandi
             }
             if (_zone.id == 0)
             {
-                StaticLogger.Log("Zone {1} not found.", zoneName);
+                StaticLogger.Log("Zone {0} not found.", zoneName);
                 _ready = false;
             }
         }
@@ -147,7 +147,7 @@ namespace DynDnsUpdater.Gandi
 
         public bool AddHost(string hostName, string ipAddress, int defaultTTL)
         {
-            if (!_simulate || !_ready)
+            if (!_simulate && _ready)
             {
                 int newZoneVersion = _proxy.ZoneNewVersion(_apiKey, _zone.id);
                 StaticLogger.Log(String.Format("Created zone version {0}.", newZoneVersion));
