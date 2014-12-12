@@ -61,8 +61,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IDomainZone.cs" />
-    <Compile Include="ApiRecords.cs" />
+    <Compile Include="IDnsService.cs" />
+    <Compile Include="Gandi\IDomainZone.cs" />
+    <Compile Include="Gandi\ApiRecords.cs" />
     <Compile Include="AddressFinder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

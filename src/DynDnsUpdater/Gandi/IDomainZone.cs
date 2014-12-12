@@ -1,9 +1,9 @@
 ﻿using CookComputing.XmlRpc;
 
-namespace DynDnsUpdater
+namespace DynDnsUpdater.Gandi
 {
     [XmlRpcUrl("https://rpc.gandi.net/xmlrpc/")]
-    public interface IDomainZone
+    interface IDomainZone
     {
         [XmlRpcMethod("domain.zone.list")]
         ZoneListReturn[] ZoneList(string apikey);
