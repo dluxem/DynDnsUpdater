@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Gandi\GandiService.cs" />
+    <Compile Include="Gandi\GandiSetup.cs" />
     <Compile Include="IDnsService.cs" />
     <Compile Include="Gandi\IDomainZone.cs" />
     <Compile Include="Gandi\ApiRecords.cs" />

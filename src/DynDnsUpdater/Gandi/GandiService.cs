@@ -18,14 +18,14 @@ namespace DynDnsUpdater.Gandi
 
         private ZoneListReturn _zone;
 
-        public GandiService(bool useTestSystem, string apiKey, string zoneName, bool simulate)
+        public GandiService(GandiSetup setup)
         {
             StaticLogger.Log("Starting GandiService (constructor)");
-            _apiKey = apiKey;
-            _zoneName = zoneName;
-            _simulate = simulate;
+            _apiKey = setup.ApiKey;
+            _zoneName = setup.ZoneName;
+            _simulate = setup.Simulate;
 
-            if (useTestSystem) { _proxy.Url = testApiUrl; }
+            if (setup.UseTest) { _proxy.Url = testApiUrl; }
             else { _proxy.Url = prodApiUrl; }
             StaticLogger.Log("Using proxy address " + _proxy.Url);
 
@@ -33,7 +33,7 @@ namespace DynDnsUpdater.Gandi
             try
             {
                 ZoneListReturn[] list = _proxy.ZoneList(_apiKey);
-                _zone = list.FirstOrDefault<ZoneListReturn>(zr => zr.name.Equals(zoneName, StringComparison.InvariantCultureIgnoreCase));
+                _zone = list.FirstOrDefault<ZoneListReturn>(zr => zr.name.Equals(setup.ZoneName, StringComparison.InvariantCultureIgnoreCase));
                 foreach (ZoneListReturn zl in list)
                 {
                     StaticLogger.Log(String.Format("Found Zone: [{1}]{0}", zl.name, zl.id));
@@ -47,7 +47,7 @@ namespace DynDnsUpdater.Gandi
             }
             if (_zone.id == 0)
             {
-                StaticLogger.Log("Zone {0} not found.", zoneName);
+                StaticLogger.Log("Zone {0} not found.", setup.ZoneName);
                 _ready = false;
             }
         }
