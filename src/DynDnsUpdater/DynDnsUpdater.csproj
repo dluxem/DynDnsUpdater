@@ -62,15 +62,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseConfig.cs" />
+    <Compile Include="DynDnsUpdater.cs" />
     <Compile Include="Gandi\GandiService.cs" />
-    <Compile Include="Gandi\GandiSetup.cs" />
+    <Compile Include="Gandi\GandiConfig.cs" />
     <Compile Include="IDnsService.cs" />
     <Compile Include="Gandi\IDomainZone.cs" />
     <Compile Include="Gandi\ApiRecords.cs" />
     <Compile Include="AddressFinder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StaticLogger.cs" />
+    <Compile Include="Logger.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

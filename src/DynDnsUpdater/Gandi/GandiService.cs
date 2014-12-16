@@ -18,7 +18,7 @@ namespace DynDnsUpdater.Gandi
 
         private ZoneListReturn _zone;
 
-        public GandiService(GandiSetup setup)
+        public GandiService(GandiConfig setup)
         {
             Logger.Log("Starting GandiService (constructor)");
             _apiKey = setup.ApiKey;
@@ -62,7 +62,7 @@ namespace DynDnsUpdater.Gandi
             ZoneRecordReturn record = GetHostRecord(hostName, _zone);
             if (record.id == 0)
             {
-                Logger.Log(Logger.LogLevel.Info, String.Format("Host {0} NOT found in {1}. Zone ID {2}, Zone Version {3}", hostName, _zone.name, _zone.id, _zone.version));
+                Logger.Log(String.Format("Host {0} NOT found in {1}. Zone ID {2}, Zone Version {3}", hostName, _zone.name, _zone.id, _zone.version));
                 return false;
             }
             else
@@ -165,7 +165,7 @@ namespace DynDnsUpdater.Gandi
                     bool zoneUpdated = _proxy.ZoneSetActiveVersion(_apiKey, _zone.id, newZoneVersion);
                     if (zoneUpdated)
                     {
-                        Logger.Log(Logger.LogLevel.Info, String.Format("HOST ADDED. HostName:{0} Type:{1} TTL:{2} Address:{3}", hostName, newRecord.type, newRecord.ttl, newRecord.value));
+                        Logger.Log(String.Format("HOST ADDED. HostName:{0} Type:{1} TTL:{2} Address:{3}", hostName, newRecord.type, newRecord.ttl, newRecord.value));
                         Logger.Log("Zone updated to version {0}.", newZoneVersion);
                     }
                     else
@@ -183,7 +183,7 @@ namespace DynDnsUpdater.Gandi
             }
             else
             {
-                Logger.Log(Logger.LogLevel.Info, "Skipping AddHost (simulate mode/not ready)");
+                Logger.Log("Skipping AddHost (simulate mode/not ready)");
                 return true;
             }
 
