@@ -7,13 +7,13 @@ using System.IO;
 
 namespace DynDnsUpdater
 {
-    public static class StaticLogger
+    public static class Logger
     {
         private static LogMethod _logMethod;
         private static LogLevel _logLevel;
         private const LogLevel _defaultLevel = LogLevel.Debug;
 
-        static StaticLogger()
+        static Logger()
         {
             _logMethod = LogMethod.Console;
             _logLevel = LogLevel.Info;

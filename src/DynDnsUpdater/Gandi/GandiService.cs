@@ -20,34 +20,34 @@ namespace DynDnsUpdater.Gandi
 
         public GandiService(GandiSetup setup)
         {
-            StaticLogger.Log("Starting GandiService (constructor)");
+            Logger.Log("Starting GandiService (constructor)");
             _apiKey = setup.ApiKey;
             _zoneName = setup.ZoneName;
             _simulate = setup.Simulate;
 
             if (setup.UseTest) { _proxy.Url = testApiUrl; }
             else { _proxy.Url = prodApiUrl; }
-            StaticLogger.Log("Using proxy address " + _proxy.Url);
+            Logger.Log("Using proxy address " + _proxy.Url);
 
-            StaticLogger.Log("Retrieving zone list...");
+            Logger.Log("Retrieving zone list...");
             try
             {
                 ZoneListReturn[] list = _proxy.ZoneList(_apiKey);
                 _zone = list.FirstOrDefault<ZoneListReturn>(zr => zr.name.Equals(setup.ZoneName, StringComparison.InvariantCultureIgnoreCase));
                 foreach (ZoneListReturn zl in list)
                 {
-                    StaticLogger.Log(String.Format("Found Zone: [{1}]{0}", zl.name, zl.id));
+                    Logger.Log(String.Format("Found Zone: [{1}]{0}", zl.name, zl.id));
                 }
                 _ready = true;
             }
             catch (Exception e)
             {
-                StaticLogger.Log(StaticLogger.LogLevel.Error, "EXCEPTION: " + e.Message);
+                Logger.Log(Logger.LogLevel.Error, "EXCEPTION: " + e.Message);
                 _ready = false;
             }
             if (_zone.id == 0)
             {
-                StaticLogger.Log("Zone {0} not found.", setup.ZoneName);
+                Logger.Log("Zone {0} not found.", setup.ZoneName);
                 _ready = false;
             }
         }
@@ -62,12 +62,12 @@ namespace DynDnsUpdater.Gandi
             ZoneRecordReturn record = GetHostRecord(hostName, _zone);
             if (record.id == 0)
             {
-                StaticLogger.Log(StaticLogger.LogLevel.Info, String.Format("Host {0} NOT found in {1}. Zone ID {2}, Zone Version {3}", hostName, _zone.name, _zone.id, _zone.version));
+                Logger.Log(Logger.LogLevel.Info, String.Format("Host {0} NOT found in {1}. Zone ID {2}, Zone Version {3}", hostName, _zone.name, _zone.id, _zone.version));
                 return false;
             }
             else
             {
-                StaticLogger.Log(String.Format("Host {0} found in {1}. Zone ID {2}, Zone Version {3}", hostName, _zone.name, _zone.id, _zone.version));
+                Logger.Log(String.Format("Host {0} found in {1}. Zone ID {2}, Zone Version {3}", hostName, _zone.name, _zone.id, _zone.version));
                 return true;
             }
         }
@@ -78,7 +78,7 @@ namespace DynDnsUpdater.Gandi
             if (record.id == 0) { return null; }
             else
             {
-                StaticLogger.Log("Host: {0} IP: " + record.value, hostName);
+                Logger.Log("Host: {0} IP: " + record.value, hostName);
                 return record.value;
             }
         }
@@ -87,7 +87,7 @@ namespace DynDnsUpdater.Gandi
         {
             if (_simulate || !_ready) { return false; }
             int newZoneVersion = _proxy.ZoneNewVersion(_apiKey, _zone.id);
-            StaticLogger.Log(String.Format("Created zone version {0}.", newZoneVersion));
+            Logger.Log(String.Format("Created zone version {0}.", newZoneVersion));
 
             ZoneListReturn newZone = new ZoneListReturn();
             newZone.id = _zone.id;
@@ -97,16 +97,16 @@ namespace DynDnsUpdater.Gandi
 
             if (record.id == 0) { return false; }
 
-            StaticLogger.Log("Zone Record Found -");
-            StaticLogger.Log("ID: {0}", record.id);
-            StaticLogger.Log("Name: {0}", record.name);
-            StaticLogger.Log("Type: {0}", record.type);
-            StaticLogger.Log("Value: '{0}'", record.value);
-            StaticLogger.Log("newIP: '{0}'", ipAddress);
-            StaticLogger.Log("TTL: {0}", record.ttl);
+            Logger.Log("Zone Record Found -");
+            Logger.Log("ID: {0}", record.id);
+            Logger.Log("Name: {0}", record.name);
+            Logger.Log("Type: {0}", record.type);
+            Logger.Log("Value: '{0}'", record.value);
+            Logger.Log("newIP: '{0}'", ipAddress);
+            Logger.Log("TTL: {0}", record.ttl);
             if (record.type != "A")
             {
-                StaticLogger.Log("Unable to update record. Not an A record.");
+                Logger.Log("Unable to update record. Not an A record.");
                 return false;
             }
             ZoneRecord newRecord;
@@ -128,19 +128,19 @@ namespace DynDnsUpdater.Gandi
                 bool zoneUpdated = _proxy.ZoneSetActiveVersion(_apiKey, newZone.id, newZoneVersion);
                 if (zoneUpdated)
                 {
-                    StaticLogger.Log("Zone updated to version {0}. Deleting previous...", newZoneVersion);
+                    Logger.Log("Zone updated to version {0}. Deleting previous...", newZoneVersion);
                     zoneUpdated = _proxy.ZoneDeleteVersion(_apiKey, _zone.id, _zone.version);
                     _zone = newZone;
                 }
                 else
                 {
-                    StaticLogger.Log("Zone update failed.");
+                    Logger.Log("Zone update failed.");
                 }
                 return zoneUpdated;
             }
             else
             {
-                StaticLogger.Log("Unable to update record. Deleting unused zone version {0}.", newZoneVersion);
+                Logger.Log("Unable to update record. Deleting unused zone version {0}.", newZoneVersion);
                 _proxy.ZoneDeleteVersion(_apiKey, newZone.id, newZoneVersion);
                 return false;
             }
@@ -151,39 +151,39 @@ namespace DynDnsUpdater.Gandi
             if (!_simulate && _ready)
             {
                 int newZoneVersion = _proxy.ZoneNewVersion(_apiKey, _zone.id);
-                StaticLogger.Log(String.Format("Created zone version {0}.", newZoneVersion));
-                StaticLogger.Log("Zone Record NOT Found. Adding...");
+                Logger.Log(String.Format("Created zone version {0}.", newZoneVersion));
+                Logger.Log("Zone Record NOT Found. Adding...");
                 ZoneRecord newRecord;
                 newRecord.name = hostName;
                 newRecord.type = "A";
                 newRecord.ttl = defaultTTL;
                 newRecord.value = ipAddress;
                 ZoneRecordReturn result = _proxy.RecordAdd(_apiKey, _zone.id, newZoneVersion, newRecord);
-                StaticLogger.Log("New Record ID: {0}", result.id);
+                Logger.Log("New Record ID: {0}", result.id);
                 if (result.id != 0)
                 {
                     bool zoneUpdated = _proxy.ZoneSetActiveVersion(_apiKey, _zone.id, newZoneVersion);
                     if (zoneUpdated)
                     {
-                        StaticLogger.Log(StaticLogger.LogLevel.Info, String.Format("HOST ADDED. HostName:{0} Type:{1} TTL:{2} Address:{3}", hostName, newRecord.type, newRecord.ttl, newRecord.value));
-                        StaticLogger.Log("Zone updated to version {0}.", newZoneVersion);
+                        Logger.Log(Logger.LogLevel.Info, String.Format("HOST ADDED. HostName:{0} Type:{1} TTL:{2} Address:{3}", hostName, newRecord.type, newRecord.ttl, newRecord.value));
+                        Logger.Log("Zone updated to version {0}.", newZoneVersion);
                     }
                     else
                     {
-                        StaticLogger.Log(StaticLogger.LogLevel.Error, "Zone update failed.");
+                        Logger.Log(Logger.LogLevel.Error, "Zone update failed.");
                     }
                     return zoneUpdated;
                 }
                 else
                 {
-                    StaticLogger.Log("Unable to insert/add record. Deleting unused zone version {0}.", newZoneVersion);
+                    Logger.Log("Unable to insert/add record. Deleting unused zone version {0}.", newZoneVersion);
                     _proxy.ZoneDeleteVersion(_apiKey, _zone.id, newZoneVersion);
                     return false;
                 }
             }
             else
             {
-                StaticLogger.Log(StaticLogger.LogLevel.Info, "Skipping AddHost (simulate mode/not ready)");
+                Logger.Log(Logger.LogLevel.Info, "Skipping AddHost (simulate mode/not ready)");
                 return true;
             }
 

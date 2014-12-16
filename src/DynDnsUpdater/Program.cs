@@ -17,7 +17,7 @@ namespace DynDnsUpdater
 
         static Program()
         {
-            StaticLogger.LevelToOutput = StaticLogger.LogLevel.Info;
+            Logger.LevelToOutput = Logger.LogLevel.Info;
         }
 
         static void Main(string[] args)
@@ -27,10 +27,10 @@ namespace DynDnsUpdater
             string newIP = finder.GetIP();
             if (newIP == "")
             {
-                StaticLogger.Log(StaticLogger.LogLevel.Error, "Unable to determine public IP.");
+                Logger.Log(Logger.LogLevel.Error, "Unable to determine public IP.");
                 Environment.Exit(1);
             }
-            StaticLogger.Log(StaticLogger.LogLevel.Info, String.Format("Public IP: {0}", newIP));
+            Logger.Log(Logger.LogLevel.Info, String.Format("Public IP: {0}", newIP));
 
             IDnsService dnsSerivce = new GandiService(_gandiConfig);
             if (dnsSerivce.Ready()) {
@@ -39,22 +39,22 @@ namespace DynDnsUpdater
                     // check if IP changed
                     if (dnsSerivce.GetHostIp(_gandiConfig.HostName) == newIP)
                     {
-                        StaticLogger.Log("IPs match. No update necessary.");
+                        Logger.Log("IPs match. No update necessary.");
                     }
                     else {
-                        StaticLogger.Log(StaticLogger.LogLevel.Info, "IP address changed. Updating to " + newIP);
+                        Logger.Log(Logger.LogLevel.Info, "IP address changed. Updating to " + newIP);
                         dnsSerivce.UpdateHost(_gandiConfig.HostName, newIP, _defautlTTL); 
                     }
                 }
                 else
                 {
-                    StaticLogger.Log(StaticLogger.LogLevel.Info, "New host name. Adding host...");
+                    Logger.Log(Logger.LogLevel.Info, "New host name. Adding host...");
                     dnsSerivce.AddHost(_gandiConfig.HostName, newIP, _defautlTTL);
                 }
             }
             else
             {
-                StaticLogger.Log(StaticLogger.LogLevel.Error, "Unable to initialize DnsService. Exiting...");
+                Logger.Log(Logger.LogLevel.Error, "Unable to initialize DnsService. Exiting...");
                 Environment.Exit(1);
             }
         }
@@ -111,11 +111,11 @@ namespace DynDnsUpdater
                 _gandiConfig.Simulate = argList.ContainsKey("simulate");
             }
 
-            if (argList.ContainsKey("debug")) { StaticLogger.LevelToOutput = StaticLogger.LogLevel.Debug; }
+            if (argList.ContainsKey("debug")) { Logger.LevelToOutput = Logger.LogLevel.Debug; }
             if (argList.ContainsKey("logfile"))
             {
-                StaticLogger.LogFile = argList["logfile"];
-                StaticLogger.MethodToLog = StaticLogger.LogMethod.Tee;
+                Logger.LogFile = argList["logfile"];
+                Logger.MethodToLog = Logger.LogMethod.Tee;
             }
 
             if (_selectedService == ServiceType.None) { PrintUsageAndExit(); }
@@ -138,7 +138,7 @@ namespace DynDnsUpdater
 
         static void ErrorAndExit(Exception e)
         {
-            StaticLogger.Log("Error Detected:");
+            Logger.Log("Error Detected:");
             Console.Write(e.Message);
             Environment.Exit(1);
         }

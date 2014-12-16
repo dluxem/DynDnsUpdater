@@ -30,15 +30,15 @@ namespace DynDnsUpdater
         private string Try(string url)
         {
             string results;
-            StaticLogger.Log("Checking {0}...", url);
+            Logger.Log("Checking {0}...", url);
             try
             {
                 results = _webCli.DownloadString(url).Trim();
-                StaticLogger.Log("Found result: {0}", results);
+                Logger.Log("Found result: {0}", results);
             }
             catch (Exception e)
             {
-                StaticLogger.Log(StaticLogger.LogLevel.Error, "Error reaching URL: " + e.Message);
+                Logger.Log(Logger.LogLevel.Error, "Error reaching URL: " + e.Message);
                 results = "";
             }
             // Look for garbage
