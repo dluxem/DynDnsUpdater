@@ -11,22 +11,21 @@ more information.
 Download
 ========
 
-Download DynDnsUpdate at http://liberum.org/DynDnsUpdate
+Download DynDnsUpdate at http://liberum.org/DynDnsUpdater
 
 Usage Examples
 --------------
 
 Common Parameters:
+* [-debug]            Turns on debug logging
+* [-logfile filename] Log output to filename
+* [-simulate]         Test and avoid permenant changes
 
-[-debug]            Turns on debug logging
-[-logfile filename] Log output to filename
-[-simulate]         Test and avoid permenant changes
-
-Gandi:
+**Gandi:**
 
 `DynDnsUpdater.exe -gandi -apikey zzzzzzzzzzz -zonename example.com -hostname dynamichost`
 
-Gandi OT&E (Test):
+**Gandi OT&E (Test):**
 
 `DynDnsUpdater.exe -ganditest -apikey zzzzzzzzzzz -zonename example.com -hostname dynamichost`
 
