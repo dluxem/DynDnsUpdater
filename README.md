@@ -11,7 +11,7 @@ more information.
 Download
 ========
 
-Download DynDnsUpdate at http://liberum.org/DynDnsUpdater
+Download DynDnsUpdater at http://liberum.org/DynDnsUpdater
 
 Usage Examples
 --------------
